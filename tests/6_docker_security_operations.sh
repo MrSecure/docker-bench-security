@@ -8,11 +8,13 @@ check_6_4="6.4 - Avoid image sprawl"
 images=$(docker images -q | sort -u | wc -l | awk '{print $1}')
 active_images=0
 
-for c in $(docker inspect -f "{{.Image}}" $(docker ps -qa)); do
-  if docker images --no-trunc -a | grep "$c" > /dev/null ; then
-    active_images=$(( active_images += 1 ))
-  fi
-done
+if [ "$images" -gt 0 ]; then
+  for c in $(docker inspect -f "{{.Image}}" "$(docker ps -qa)"); do
+    if docker images --no-trunc -a | grep "$c" > /dev/null ; then
+      active_images=$(( active_images += 1 ))
+    fi
+  done
+fi
 
 if [ "$images" -gt 100 ]; then
   warn "$check_6_4"
